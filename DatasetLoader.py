@@ -31,8 +31,11 @@ def loadWAV(filename, max_frames, evalmode=True, num_eval=10):
 
     audiosize = audio.shape[0]
 
+    if numeval == 0:
+        numeval = audiosize // max_audio
+
     if audiosize <= max_audio:
-        shortage    = max_audio - audiosize + 1 
+        shortage    = max_audio - audiosize + 1
         audio       = numpy.pad(audio, (0, shortage), 'wrap')
         audiosize   = audio.shape[0]
 
@@ -40,7 +43,7 @@ def loadWAV(filename, max_frames, evalmode=True, num_eval=10):
         startframe = numpy.linspace(0,audiosize-max_audio,num=num_eval)
     else:
         startframe = numpy.array([numpy.int64(random.random()*(audiosize-max_audio))])
-    
+
     feats = []
     if evalmode and max_frames == 0:
         feats.append(audio)
@@ -51,7 +54,7 @@ def loadWAV(filename, max_frames, evalmode=True, num_eval=10):
     feat = numpy.stack(feats,axis=0).astype(numpy.float)
 
     return feat;
-    
+
 class AugmentWAV(object):
 
     def __init__(self, musan_path, rir_path, max_frames):
@@ -76,7 +79,7 @@ class AugmentWAV(object):
 
     def additive_noise(self, noisecat, audio):
 
-        clean_db = 10 * numpy.log10(numpy.mean(audio ** 2)+1e-4) 
+        clean_db = 10 * numpy.log10(numpy.mean(audio ** 2)+1e-4)
 
         numnoise    = self.numnoise[noisecat]
         noiselist   = random.sample(self.noiselist[noisecat], random.randint(numnoise[0],numnoise[1]))
@@ -87,7 +90,7 @@ class AugmentWAV(object):
 
             noiseaudio  = loadWAV(noise, self.max_frames, evalmode=False)
             noise_snr   = random.uniform(self.noisesnr[noisecat][0],self.noisesnr[noisecat][1])
-            noise_db = 10 * numpy.log10(numpy.mean(noiseaudio[0] ** 2)+1e-4) 
+            noise_db = 10 * numpy.log10(numpy.mean(noiseaudio[0] ** 2)+1e-4)
             noises.append(numpy.sqrt(10 ** ((clean_db - noise_db - noise_snr) / 10)) * noiseaudio)
 
         return numpy.sum(numpy.concatenate(noises,axis=0),axis=0,keepdims=True) + audio
@@ -96,7 +99,7 @@ class AugmentWAV(object):
     def reverberate(self, audio):
 
         rir_file    = random.choice(self.rir_files)
-        
+
         fs, rir     = wavfile.read(rir_file)
         rir         = numpy.expand_dims(rir.astype(numpy.float),0)
         rir         = rir / numpy.sqrt(numpy.sum(rir**2))
@@ -126,7 +129,7 @@ class voxceleb_loader(Dataset):
         self.musan_path = musan_path
         self.rir_path   = rir_path
         self.augment    = augment
-        
+
         ### Read Training Files...
         with open(dataset_file_name) as dataset_file:
             lines = dataset_file.readlines();
@@ -138,7 +141,7 @@ class voxceleb_loader(Dataset):
         self.label_dict = {}
         self.data_list  = []
         self.data_label = []
-        
+
         for lidx, line in enumerate(lines):
             data = line.strip().split();
 
@@ -149,7 +152,7 @@ class voxceleb_loader(Dataset):
                 self.label_dict[speaker_label] = [];
 
             self.label_dict[speaker_label].append(lidx);
-            
+
             self.data_label.append(speaker_label)
             self.data_list.append(filename)
 
@@ -158,9 +161,9 @@ class voxceleb_loader(Dataset):
         feat = []
 
         for index in indices:
-            
+
             audio = loadWAV(self.data_list[index], self.max_frames, evalmode=False)
-            
+
             if self.augment:
                 augtype = random.randint(0,4)
                 if augtype == 1:
@@ -171,7 +174,7 @@ class voxceleb_loader(Dataset):
                     audio   = self.augment_wav.additive_noise('speech',audio)
                 elif augtype == 4:
                     audio   = self.augment_wav.additive_noise('noise',audio)
-                    
+
             feat.append(audio);
 
         feat = numpy.concatenate(feat, axis=0)
@@ -189,9 +192,9 @@ class voxceleb_sampler(torch.utils.data.Sampler):
         self.nPerSpeaker        = nPerSpeaker
         self.max_seg_per_spk    = max_seg_per_spk;
         self.batch_size         = batch_size;
-        
+
     def __iter__(self):
-        
+
         dictkeys = list(self.label_dict.keys());
         dictkeys.sort()
 
@@ -204,7 +207,7 @@ class voxceleb_sampler(torch.utils.data.Sampler):
         for findex, key in enumerate(dictkeys):
             data    = self.label_dict[key]
             numSeg  = round_down(min(len(data),self.max_seg_per_spk),self.nPerSpeaker)
-            
+
             rp      = lol(numpy.random.permutation(len(data))[:numSeg],self.nPerSpeaker)
             flattened_label.extend([findex] * (len(rp)))
             for indices in rp:
@@ -221,16 +224,16 @@ class voxceleb_sampler(torch.utils.data.Sampler):
             if flattened_label[ii] not in mixlabel[startbatch:]:
                 mixlabel.append(flattened_label[ii])
                 mixmap.append(ii)
-        
+
         return iter([flattened_list[i] for i in mixmap])
-    
+
     def __len__(self):
         return len(self.data_source)
 
 
 
 def get_data_loader(dataset_file_name, batch_size, augment, musan_path, rir_path, max_frames, max_seg_per_spk, nDataLoaderThread, nPerSpeaker, train_path, **kwargs):
-    
+
     train_dataset = voxceleb_loader(dataset_file_name, augment, musan_path, rir_path, max_frames, train_path)
 
     train_sampler = voxceleb_sampler(train_dataset, nPerSpeaker, max_seg_per_spk, batch_size)
@@ -244,7 +247,5 @@ def get_data_loader(dataset_file_name, batch_size, augment, musan_path, rir_path
         worker_init_fn=worker_init_fn,
         drop_last=True,
     )
-    
+
     return train_loader
-
-
