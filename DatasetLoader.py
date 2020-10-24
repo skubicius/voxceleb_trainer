@@ -31,8 +31,8 @@ def loadWAV(filename, max_frames, evalmode=True, num_eval=10):
 
     audiosize = audio.shape[0]
 
-    if numeval == 0:
-        numeval = audiosize // max_audio
+    if num_eval == 0:
+        num_eval = audiosize // max_audio
 
     if audiosize <= max_audio:
         shortage    = max_audio - audiosize + 1
