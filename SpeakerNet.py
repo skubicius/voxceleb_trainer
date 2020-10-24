@@ -96,7 +96,7 @@ class SpeakerNet(nn.Module):
     ## Evaluate from list
     ## ===== ===== ===== ===== ===== ===== ===== =====
 
-    def evaluateFromList(self, listfilename, print_interval=100, test_path='', num_eval=500, eval_frames=None):
+    def evaluateFromList(self, listfilename, print_interval=100, test_path='', num_eval=0, eval_frames=None):
 
         self.eval();
 
