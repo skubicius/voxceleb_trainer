@@ -9,6 +9,12 @@ import time, os, itertools, shutil, importlib
 from tuneThreshold import tuneThresholdfromScore
 from DatasetLoader import loadWAV
 
+def chunks(lst, n):
+    """Yield successive n-sized chunks from lst."""
+    for i in range(0, lst.shape[1], n):
+        if lst[i:i + n, :].shape[0]:
+          yield lst[i:i + n, :]
+
 class SpeakerNet(nn.Module):
 
     def __init__(self, model, optimizer, scheduler, trainfunc, **kwargs):
@@ -44,7 +50,7 @@ class SpeakerNet(nn.Module):
         top1    = 0     # EER or accuracy
 
         tstart = time.time()
-        
+
         for data, data_label in loader:
 
             data = data.transpose(0,1)
@@ -82,7 +88,7 @@ class SpeakerNet(nn.Module):
         if self.lr_step == 'epoch': self.__scheduler__.step()
 
         sys.stdout.write("\n");
-        
+
         return (loss/counter, top1/counter);
 
 
@@ -90,10 +96,10 @@ class SpeakerNet(nn.Module):
     ## Evaluate from list
     ## ===== ===== ===== ===== ===== ===== ===== =====
 
-    def evaluateFromList(self, listfilename, print_interval=100, test_path='', num_eval=10, eval_frames=None):
-        
+    def evaluateFromList(self, listfilename, print_interval=100, test_path='', num_eval=500, eval_frames=None):
+
         self.eval();
-        
+
         lines       = []
         files       = []
         feats       = {}
@@ -120,10 +126,20 @@ class SpeakerNet(nn.Module):
 
         ## Save all features to file
         for idx, file in enumerate(setfiles):
+            wavs = loadWAV(os.path.join(test_path,file), eval_frames, evalmode=True, num_eval=num_eval)
 
-            inp1 = torch.FloatTensor(loadWAV(os.path.join(test_path,file), eval_frames, evalmode=True, num_eval=num_eval)).cuda()
+            print('wavs size', wavs.shape)
+            res = []
+            for c in chunks(wavs, 10):
+              inp1 = torch.FloatTensor(c).cuda()
 
-            ref_feat = self.__S__.forward(inp1).detach().cpu()
+              ref_feat = self.__S__.forward(inp1).detach().cpu()
+              res.append(ref_feat)
+
+            res = torch.cat(res)
+
+            import pickle
+            pickle.dump(res,  open( f"{file}.p", "wb" ) )
 
             filename = '%06d.wav'%idx
 
@@ -159,7 +175,7 @@ class SpeakerNet(nn.Module):
 
             score = -1 * numpy.mean(dist);
 
-            all_scores.append(score);  
+            all_scores.append(score);
             all_labels.append(int(data[0]));
             all_trials.append(data[1]+" "+data[2])
 
@@ -178,7 +194,7 @@ class SpeakerNet(nn.Module):
     ## ===== ===== ===== ===== ===== ===== ===== =====
 
     def saveParameters(self, path):
-        
+
         torch.save(self.state_dict(), path);
 
 
@@ -204,4 +220,3 @@ class SpeakerNet(nn.Module):
                 continue;
 
             self_state[name].copy_(param);
-
