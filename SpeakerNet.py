@@ -141,8 +141,7 @@ class SpeakerNet(nn.Module):
             # import pickle
             # pickle.dump(res,  open( f"{file}.p", "wb" ) )
 
-            fn = ''.join(file.split('.')[:-1])
-            with open(f'{fn}.npy', 'wb') as f:
+            with open(f'{file}.npy', 'wb') as f:
                 numpy.save(f, res)
 
             filename = '%06d.wav'%idx
