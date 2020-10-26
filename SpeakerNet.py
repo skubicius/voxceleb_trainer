@@ -96,7 +96,7 @@ class SpeakerNet(nn.Module):
     ## Evaluate from list
     ## ===== ===== ===== ===== ===== ===== ===== =====
 
-    def evaluateFromList(self, listfilename, print_interval=100, test_path='', num_eval=0, eval_frames=None):
+    def evaluateFromList(self, listfilename, print_interval=100, test_path='', num_eval=0, eval_frames=None, step=0.2):
 
         self.eval();
 
@@ -126,7 +126,7 @@ class SpeakerNet(nn.Module):
 
         ## Save all features to file
         for idx, file in enumerate(setfiles):
-            wavs = loadWAV(os.path.join(test_path,file), eval_frames, evalmode=True, num_eval=num_eval)
+            wavs = loadWAV(os.path.join(test_path,file), eval_frames, evalmode=True, num_eval=num_eval, step=step)
 
             print('wavs size', wavs.shape)
             res = []
@@ -150,7 +150,7 @@ class SpeakerNet(nn.Module):
             if idx % print_interval == 0:
                 sys.stdout.write("\rReading %d of %d: %.2f Hz, embedding size %d"%(idx,len(setfiles),idx/telapsed,ref_feat.size()[1]));
 
-        print('')
+        return
         all_scores = [];
         all_labels = [];
         all_trials = [];

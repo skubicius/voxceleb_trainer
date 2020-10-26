@@ -21,13 +21,12 @@ def worker_init_fn(worker_id):
     numpy.random.seed(numpy.random.get_state()[1][0] + worker_id)
 
 
-def loadWAV(filename, max_frames, evalmode=True, num_eval=10):
-
-    # Maximum audio length
-    max_audio = max_frames * 160
-
+def loadWAV(filename, max_frames, evalmode=True, num_eval=10, step=0.2):
     # Read wav file and convert to torch tensor
     sample_rate, audio  = wavfile.read(filename)
+
+    # Maximum audio length
+    max_audio = max_frames * sample_rate / 100
 
     audiosize = audio.shape[0]
 
@@ -40,7 +39,7 @@ def loadWAV(filename, max_frames, evalmode=True, num_eval=10):
         audiosize   = audio.shape[0]
 
     if evalmode:
-        startframe = numpy.linspace(0,audiosize-max_audio,num=num_eval)
+        startframe = numpy.arange(0,audiosize-max_audio,step=step * max_audio)
     else:
         startframe = numpy.array([numpy.int64(random.random()*(audiosize-max_audio))])
 
@@ -53,7 +52,7 @@ def loadWAV(filename, max_frames, evalmode=True, num_eval=10):
 
     feat = numpy.stack(feats,axis=0).astype(numpy.float)
 
-    return feat;
+    return feat
 
 class AugmentWAV(object):
 

@@ -61,6 +61,8 @@ parser.add_argument('--log_input',      type=bool,  default=False,  help='Log in
 parser.add_argument('--model',          type=str,   default="",     help='Name of model definition');
 parser.add_argument('--encoder_type',   type=str,   default="SAP",  help='Type of encoder');
 parser.add_argument('--nOut',           type=int,   default=512,    help='Embedding size in the last FC layer');
+parser.add_argument('--step',           type=float, default=0.2,    help='Window step');
+
 
 ## For test only
 parser.add_argument('--eval', dest='eval', action='store_true', help='Eval only')
@@ -120,7 +122,7 @@ for ii in range(0,it-1):
 ## Evaluation code
 if args.eval == True:
         
-    sc, lab, trials = s.evaluateFromList(args.test_list, print_interval=100, test_path=args.test_path, eval_frames=args.eval_frames)
+    sc, lab, trials = s.evaluateFromList(args.test_list, print_interval=100, test_path=args.test_path, eval_frames=args.eval_frames, step=args.step)
     result = tuneThresholdfromScore(sc, lab, [1, 0.1]);
     print('EER %2.4f'%result[1])
 
