@@ -90,6 +90,10 @@ if args.config is not None:
 model_save_path     = args.save_path+"/model"
 result_save_path    = args.save_path+"/result"
 
+
+if not(os.path.exists(save_path)):
+    os.makedirs(save_path)
+
 if not(os.path.exists(model_save_path)):
     os.makedirs(model_save_path)
         
@@ -122,7 +126,7 @@ for ii in range(0,it-1):
 ## Evaluation code
 if args.eval == True:
         
-    sc, lab, trials = s.evaluateFromList(args.test_list, print_interval=100, test_path=args.test_path, eval_frames=args.eval_frames, step=args.step)
+    sc, lab, trials = s.evaluateFromList(args.test_list, print_interval=100, test_path=args.test_path, eval_frames=args.eval_frames, step=args.step, save_path=save_path)
     result = tuneThresholdfromScore(sc, lab, [1, 0.1]);
     print('EER %2.4f'%result[1])
 

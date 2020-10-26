@@ -96,7 +96,7 @@ class SpeakerNet(nn.Module):
     ## Evaluate from list
     ## ===== ===== ===== ===== ===== ===== ===== =====
 
-    def evaluateFromList(self, listfilename, print_interval=100, test_path='', num_eval=0, eval_frames=None, step=0.2):
+    def evaluateFromList(self, listfilename, print_interval=100, test_path='', num_eval=0, eval_frames=None, step=0.2, save_path="./"):
 
         self.eval();
 
@@ -141,7 +141,7 @@ class SpeakerNet(nn.Module):
             # import pickle
             # pickle.dump(res,  open( f"{file}.p", "wb" ) )
 
-            with open(f'{file}.npy', 'wb') as f:
+            with open(f'{save_path}/{file}.npy', 'wb') as f:
                 numpy.save(f, res)
 
             filename = '%06d.wav'%idx
