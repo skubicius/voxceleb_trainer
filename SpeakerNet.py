@@ -138,8 +138,10 @@ class SpeakerNet(nn.Module):
 
             res = torch.cat(res)
 
-            import pickle
-            pickle.dump(res,  open( f"{file}.p", "wb" ) )
+            # import pickle
+            # pickle.dump(res,  open( f"{file}.p", "wb" ) )
+            with open(f'{file}.npy', 'wb') as f:
+                numpy.save(f, res)
 
             filename = '%06d.wav'%idx
 
