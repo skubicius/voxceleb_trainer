@@ -112,13 +112,13 @@ class SpeakerNet(nn.Module):
                 if (not line):
                     break;
 
-                data = line.split();
+                data = line.strip();
 
                 ## Append random label if missing
-                if len(data) == 2: data = [random.randint(0,1)] + data
+                # if len(data) == 2: data = [random.randint(0,1)] + data
 
-                files.append(data[1])
-                files.append(data[2])
+                files.append(data)
+                # files.append(data[2])
                 lines.append(line)
 
         setfiles = list(set(files))
