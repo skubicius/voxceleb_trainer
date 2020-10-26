@@ -89,7 +89,7 @@ if args.config is not None:
 ## Initialise directories
 model_save_path     = args.save_path+"/model"
 result_save_path    = args.save_path+"/result"
-
+save_path = args.save_path
 
 if not(os.path.exists(save_path)):
     os.makedirs(save_path)
