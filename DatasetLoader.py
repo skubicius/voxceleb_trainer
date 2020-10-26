@@ -26,7 +26,7 @@ def loadWAV(filename, max_frames, evalmode=True, num_eval=10, step=0.2):
     sample_rate, audio  = wavfile.read(filename)
 
     # Maximum audio length
-    max_audio = max_frames * sample_rate / 100
+    max_audio = int(max_frames * sample_rate / 100)
 
     audiosize = audio.shape[0]
 
