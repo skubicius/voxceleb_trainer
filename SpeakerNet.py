@@ -126,7 +126,7 @@ class SpeakerNet(nn.Module):
 
         ## Save all features to file
         for idx, file in enumerate(setfiles):
-            wavs = loadWAV(os.path.join(test_path,file), eval_frames, evalmode=True, num_eval=num_eval, step=step)
+            wavs = loadWAV(os.path.join(test_path,file+'.wav'), eval_frames, evalmode=True, num_eval=num_eval, step=step)
 
             print('wavs size', wavs.shape)
             res = []
