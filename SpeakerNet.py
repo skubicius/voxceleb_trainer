@@ -9,6 +9,8 @@ import time, os, itertools, shutil, importlib
 from tuneThreshold import tuneThresholdfromScore
 from DatasetLoader import loadWAV
 
+device = 'cuda' if torch.cuda.is_available() else 'cpu'
+
 def chunks(lst, n):
     """Yield successive n-sized chunks from lst."""
     for i in range(0, lst.shape[1], n):
@@ -21,10 +23,10 @@ class SpeakerNet(nn.Module):
         super(SpeakerNet, self).__init__();
 
         SpeakerNetModel = importlib.import_module('models.'+model).__getattribute__('MainModel')
-        self.__S__ = SpeakerNetModel(**kwargs).cuda();
+        self.__S__ = SpeakerNetModel(**kwargs).to(device);
 
         LossFunction = importlib.import_module('loss.'+trainfunc).__getattribute__('LossFunction')
-        self.__L__ = LossFunction(**kwargs).cuda();
+        self.__L__ = LossFunction(**kwargs).to(device);
 
         Optimizer = importlib.import_module('optimizer.'+optimizer).__getattribute__('Optimizer')
         self.__optimizer__ = Optimizer(self.parameters(), **kwargs)
@@ -59,12 +61,12 @@ class SpeakerNet(nn.Module):
 
             feat = []
             for inp in data:
-                outp      = self.__S__.forward(inp.cuda())
+                outp      = self.__S__.forward(inp.to(device))
                 feat.append(outp)
 
             feat = torch.stack(feat,dim=1).squeeze()
 
-            label   = torch.LongTensor(data_label).cuda()
+            label   = torch.LongTensor(data_label).to(device)
 
             nloss, prec1 = self.__L__.forward(feat,label)
 
@@ -131,7 +133,7 @@ class SpeakerNet(nn.Module):
             print('wavs size', wavs.shape)
             res = []
             for c in chunks(wavs, 10):
-              inp1 = torch.FloatTensor(c).cuda()
+              inp1 = torch.FloatTensor(c).to(device)
 
               ref_feat = self.__S__.forward(inp1).detach().cpu()
               res.append(ref_feat)
@@ -167,8 +169,8 @@ class SpeakerNet(nn.Module):
             ## Append random label if missing
             if len(data) == 2: data = [random.randint(0,1)] + data
 
-            ref_feat = feats[data[1]].cuda()
-            com_feat = feats[data[2]].cuda()
+            ref_feat = feats[data[1]].to(device)
+            com_feat = feats[data[2]].to(device)
 
             if self.__L__.test_normalize:
                 ref_feat = F.normalize(ref_feat, p=2, dim=1)
