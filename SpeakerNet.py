@@ -210,7 +210,7 @@ class SpeakerNet(nn.Module):
     def loadParameters(self, path):
 
         self_state = self.state_dict();
-        loaded_state = torch.load(path);
+        loaded_state = torch.load(path, map_location=torch.device(device));
         for name, param in loaded_state.items():
             origname = name;
             if name not in self_state:
