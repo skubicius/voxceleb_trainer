@@ -28,7 +28,7 @@ def loadWAV(filename, max_frames, evalmode=True, num_eval=10, step=0.2):
     # Maximum audio length
     max_audio = int(max_frames * sample_rate / 100)
 
-    print(sample_rate, max_audio)
+    
 
     audiosize = audio.shape[0]
 
@@ -40,6 +40,8 @@ def loadWAV(filename, max_frames, evalmode=True, num_eval=10, step=0.2):
         audio       = numpy.pad(audio, (0, shortage), 'wrap')
         audiosize   = audio.shape[0]
 
+    print(sample_rate, max_audio, step, audiosize)
+        
     if evalmode:
         startframe = numpy.arange(0,audiosize-max_audio,step=step * max_audio)
     else:
