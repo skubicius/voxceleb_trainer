@@ -94,11 +94,11 @@ save_path = args.save_path
 if not(os.path.exists(save_path)):
     os.makedirs(save_path)
 
-if not(os.path.exists(model_save_path)):
-    os.makedirs(model_save_path)
+# if not(os.path.exists(model_save_path)):
+#     os.makedirs(model_save_path)
         
-if not(os.path.exists(result_save_path)):
-    os.makedirs(result_save_path)
+# if not(os.path.exists(result_save_path)):
+#     os.makedirs(result_save_path)
 
 ## Load models
 s = SpeakerNet(**vars(args));
