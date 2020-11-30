@@ -56,11 +56,11 @@ def loadWAV(filename, max_frames, evalmode=True, num_eval=10, step=0.2):
         for asf in startframe:
             feats.append(audio[int(asf):int(asf)+max_audio])
     
-    print(len(feats))
-    feat = numpy.stack(feats,axis=0).astype(numpy.float)
-    print(feat.shape)
+    # print(len(feats))
+    # feat = numpy.stack(feats,axis=0).astype(numpy.float)
+    # print(feat.shape)
     
-    return feat
+    return feats
 
 class AugmentWAV(object):
 
