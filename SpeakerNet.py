@@ -13,9 +13,9 @@ device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
 def chunks(lst, n):
     """Yield successive n-sized chunks from lst."""
-    for i in range(0, lst.shape[1], n):
-        if lst[i:i + n, :].shape[0]:
-          yield lst[i:i + n, :]
+    for i in range(0, len(lst), n):
+        if lst[i:i + n]:
+          yield lst[i:i + n]
 
 class SpeakerNet(nn.Module):
 
@@ -132,8 +132,8 @@ class SpeakerNet(nn.Module):
 
             print('wavs size', len(wavs))
             res = []
-            for c in wavs:
-              c = numpy.array(c).astype(numpy.float)
+            for c in chunks(wavs, 20):
+              c = numpy.stack(c, axis=0).astype(numpy.float)
               inp1 = torch.FloatTensor(c).to(device)
 
               ref_feat = self.__S__.forward(inp1).detach().cpu()
