@@ -133,6 +133,7 @@ class SpeakerNet(nn.Module):
             print('wavs size', len(wavs))
             res = []
             for c in wavs:
+              c = numpy.array(c).astype(numpy.float)
               inp1 = torch.FloatTensor(c).to(device)
 
               ref_feat = self.__S__.forward(inp1).detach().cpu()
