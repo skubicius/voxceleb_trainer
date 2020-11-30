@@ -130,7 +130,7 @@ class SpeakerNet(nn.Module):
         for idx, file in enumerate(setfiles):
             wavs = loadWAV(os.path.join(test_path,file+'.wav'), eval_frames, evalmode=True, num_eval=num_eval, step=step)
 
-            print('wavs size', len(wavs)
+            print('wavs size', len(wavs))
             res = []
             for c in wavs:
               inp1 = torch.FloatTensor(c).to(device)
